@@ -1,79 +1,134 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-import connectDB from '@/lib/db';
-import Document from '@/models/Document';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { connectToDatabase } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const token = cookies().get('token')?.value;
+    const session = await getServerSession(authOptions);
 
-    if (!token) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { message: 'Authentication required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
-    );
-    const { payload } = await jwtVerify(token, secret);
-    const userId = payload.userId;
-
-    await connectDB();
-
-    const documents = await Document.find({ userId })
+    const { db } = await connectToDatabase();
+    const documents = await db
+      .collection('documents')
+      .find({ userEmail: session.user.email })
       .sort({ createdAt: -1 })
-      .select('_id title type content createdAt');
+      .toArray();
 
     return NextResponse.json(documents);
   } catch (error) {
     console.error('Error fetching documents:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { message: 'Error fetching documents' },
+      { message: 'Internal server error' },
       { status: 500 }
     );
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const token = cookies().get('token')?.value;
+    const session = await getServerSession(authOptions);
 
-    if (!token) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { message: 'Authentication required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
-    );
-    const { payload } = await jwtVerify(token, secret);
-    const userId = payload.userId;
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const type = formData.get('type') as 'text' | 'file' | 'link';
+    const topic = formData.get('topic') as string;
+    const category = formData.get('category') as string;
 
-    const { title, type, content, fileUrl, fileType, fileSize, link } = await req.json();
+    if (!title || !type || !topic || !category) {
+      return NextResponse.json(
+        { message: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
 
-    await connectDB();
-
-    const document = await Document.create({
+    const { db } = await connectToDatabase();
+    const document = {
+      _id: new ObjectId(),
       title,
       type,
-      content,
-      fileUrl,
-      fileType,
-      fileSize,
-      link,
-      userId,
-    });
+      topic,
+      category,
+      userEmail: session.user.email,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    return NextResponse.json(document, { status: 201 });
+    if (type === 'text') {
+      const content = formData.get('content') as string;
+      if (!content) {
+        return NextResponse.json(
+          { message: 'Content is required for text documents' },
+          { status: 400 }
+        );
+      }
+      Object.assign(document, { content });
+    } else if (type === 'file') {
+      const file = formData.get('file') as File;
+      if (!file) {
+        return NextResponse.json(
+          { message: 'File is required for file documents' },
+          { status: 400 }
+        );
+      }
+      const buffer = await file.arrayBuffer();
+      const fileName = file.name;
+      const fileType = file.type;
+      Object.assign(document, {
+        file: buffer,
+        fileName,
+        fileType,
+      });
+    } else if (type === 'link') {
+      const link = formData.get('link') as string;
+      if (!link) {
+        return NextResponse.json(
+          { message: 'Link is required for link documents' },
+          { status: 400 }
+        );
+      }
+      Object.assign(document, { link });
+    }
+
+    const result = await db.collection('documents').insertOne(document);
+
+    if (!result.acknowledged) {
+      throw new Error('Failed to create document');
+    }
+
+    return NextResponse.json(document);
   } catch (error) {
     console.error('Error creating document:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { message: 'Error creating document' },
+      { message: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     // Check password
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await compare(password, user.password);
     if (!isValid) {
       return NextResponse.json(
         { message: 'Invalid credentials' },
@@ -35,28 +35,24 @@ export async function POST(request: Request) {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
-      { expiresIn: '7d' }
+    const token = sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '30d' }
     );
 
-    // Create response with token
-    const response = NextResponse.json(
-      { message: 'Login successful' },
+    return NextResponse.json(
+      {
+        message: 'Login successful',
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
       { status: 200 }
     );
-
-    // Set HTTP-only cookie
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
-
-    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

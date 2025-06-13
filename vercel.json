@@ -4,9 +4,5 @@
   "devCommand": "yarn dev",
   "installCommand": "yarn install",
   "framework": "nextjs",
-  "regions": ["sin1"],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret"
-  }
+  "regions": ["sin1"]
 }

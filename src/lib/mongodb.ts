@@ -5,9 +5,13 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+};
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
@@ -29,9 +33,21 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export async function connectToDatabase() {
-  const client = await clientPromise;
-  const db = client.db();
-  return { client, db };
+  try {
+    const mongoClient = await clientPromise;
+    // Ping the server to check connection
+    await mongoClient.db(process.env.MONGODB_DB || 'docsave').command({ ping: 1 });
+    const db = mongoClient.db(process.env.MONGODB_DB || 'docsave');
+    return { client: mongoClient, db };
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    // Try to reconnect if connection failed
+    const newClient = new MongoClient(uri, options);
+    const newClientPromise = newClient.connect();
+    const mongoClient = await newClientPromise;
+    const db = mongoClient.db(process.env.MONGODB_DB || 'docsave');
+    return { client: mongoClient, db };
+  }
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a

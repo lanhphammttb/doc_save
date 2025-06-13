@@ -1,12 +1,14 @@
-import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import Layout from '@/components/layout';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'DocSave - Document Management System',
-  description: 'A modern document management system for storing and organizing your files, text, and links.',
+  title: 'DocSave - Simple Document Management',
+  description: 'A simple and efficient document management system',
 };
 
 export default function RootLayout({
@@ -17,9 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-background">
+        <Providers>
           {children}
-        </div>
+        </Providers>
       </body>
     </html>
   );

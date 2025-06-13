@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
+import { hash } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request: Request) {
@@ -10,6 +10,13 @@ export async function POST(request: Request) {
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { message: 'Password must be at least 6 characters' },
         { status: 400 }
       );
     }
@@ -26,15 +33,18 @@ export async function POST(request: Request) {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hash(password, 12);
 
     // Create user
-    const result = await db.collection('users').insertOne({
+    const user = {
       name,
       email,
       password: hashedPassword,
       createdAt: new Date(),
-    });
+      updatedAt: new Date(),
+    };
+
+    const result = await db.collection('users').insertOne(user);
 
     // Generate JWT token
     const token = jwt.sign(
