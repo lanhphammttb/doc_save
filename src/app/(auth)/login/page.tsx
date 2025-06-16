@@ -21,15 +21,12 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email: values.email,
         password: values.password,
-        redirect: false,
+        redirect: true,
         callbackUrl: '/dashboard',
       });
 
       if (result?.error) {
         message.error(result.error);
-      } else {
-        message.success('Login successful');
-        router.push('/dashboard');
       }
     } catch (error) {
       message.error('An error occurred during login');
