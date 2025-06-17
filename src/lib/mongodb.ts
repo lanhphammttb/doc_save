@@ -38,13 +38,6 @@ if (process.env.NODE_ENV === 'development') {
 export async function connectToDatabase() {
   try {
     const mongoClient = await clientPromise;
-
-    // Check if client is connected
-    if (!mongoClient.topology?.isConnected()) {
-      console.log('MongoDB client not connected, reconnecting...');
-      await mongoClient.connect();
-    }
-
     const db = mongoClient.db(process.env.MONGODB_DB || 'docsave');
 
     // Test the connection with a simple command
@@ -53,7 +46,12 @@ export async function connectToDatabase() {
     } catch (pingError) {
       console.error('Ping failed, reconnecting...', pingError);
       // If ping fails, try to reconnect
-      await mongoClient.close();
+      try {
+        await mongoClient.close();
+      } catch (closeError) {
+        console.error('Error closing connection:', closeError);
+      }
+
       const newClient = new MongoClient(uri, options);
       const newClientPromise = newClient.connect();
       const newMongoClient = await newClientPromise;
