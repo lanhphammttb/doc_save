@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
 
     // Get documents for the user
     const documents = await db.collection('documents')
-      .find({ userId: decoded.userId })
+      .find({ userEmail: decoded.email })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
 
     // Create document
     const document = {
-      userId: decoded.userId,
+      userEmail: decoded.email,
       title,
       content,
       type: type || 'text',
