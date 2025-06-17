@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { verify } from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 
 // Helper function to verify JWT token
 async function verifyToken(token: string) {
@@ -75,8 +76,30 @@ export async function GET(request: NextRequest) {
 
     // Connect to database to get fresh user data
     const { db } = await connectToDatabase();
+
+    // Convert string userId to ObjectId
+    let userId;
+    try {
+      userId = new ObjectId(decoded.userId);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid user ID format'
+        },
+        {
+          status: 400,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        }
+      );
+    }
+
     const user = await db.collection('users').findOne(
-      { _id: decoded.userId },
+      { _id: userId },
       { projection: { password: 0 } } // Exclude password
     );
 
