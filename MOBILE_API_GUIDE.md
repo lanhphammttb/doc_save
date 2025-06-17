@@ -11,6 +11,7 @@
 ### Mobile App (JWT)
 - `/api/mobile/auth/login` - Login cho Flutter app
 - `/api/mobile/auth/register` - Register cho Flutter app
+- `/api/mobile/auth/verify` - Verify JWT token
 - `/api/mobile/documents` - Documents cho Flutter app
 - `/api/mobile/links` - Links cho Flutter app
 
@@ -54,7 +55,27 @@ if (data['success']) {
 }
 ```
 
-### 3. Get Documents
+### 3. Verify Token (Kiểm tra token còn hợp lệ không)
+```dart
+final response = await http.get(
+  Uri.parse('${ApiConfig.baseUrl}/auth/verify'),
+  headers: ApiConfig.getHeaders(token: token),
+);
+
+final data = jsonDecode(response.body);
+if (data['success']) {
+  // Token còn hợp lệ, lấy thông tin user mới nhất
+  final user = data['data']['user'];
+  final tokenInfo = data['data']['token'];
+
+  // Có thể refresh token nếu cần
+} else {
+  // Token hết hạn hoặc không hợp lệ, chuyển về màn hình login
+  // Xóa token khỏi local storage
+}
+```
+
+### 4. Get Documents
 ```dart
 final response = await http.get(
   Uri.parse('${ApiConfig.baseUrl}/documents'),
@@ -68,7 +89,7 @@ if (data['success']) {
 }
 ```
 
-### 4. Create Document
+### 5. Create Document
 ```dart
 final response = await http.post(
   Uri.parse('${ApiConfig.baseUrl}/documents'),
@@ -99,6 +120,13 @@ Tất cả API mobile đều trả về format thống nhất:
   "error": "Error details (if any)"
 }
 ```
+
+## Khi nào cần dùng API verify:
+
+1. **App startup**: Kiểm tra token có hợp lệ không khi mở app
+2. **Token refresh**: Lấy thông tin user mới nhất
+3. **Auto-logout**: Tự động đăng xuất khi token hết hạn
+4. **Session management**: Quản lý phiên đăng nhập
 
 ## Lợi ích của việc tách riêng:
 
