@@ -5,15 +5,46 @@ import jwt from 'jsonwebtoken';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
-
-    if (!name || !email || !password) {
+    // Parse request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
       return NextResponse.json(
-        { message: 'Missing required fields' },
+        { message: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
 
+    const { name, email, password } = body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      const missingFields = [];
+      if (!name) missingFields.push('name');
+      if (!email) missingFields.push('email');
+      if (!password) missingFields.push('password');
+
+      return NextResponse.json(
+        {
+          message: `Missing required fields: ${missingFields.join(', ')}`,
+          missingFields
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { message: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // Validate password length
     if (password.length < 6) {
       return NextResponse.json(
         { message: 'Password must be at least 6 characters' },
@@ -21,41 +52,102 @@ export async function POST(request: Request) {
       );
     }
 
-    const { db } = await connectToDatabase();
-
-    // Check if user already exists
-    const existingUser = await db.collection('users').findOne({ email });
-    if (existingUser) {
+    // Validate name length
+    if (name.trim().length < 2) {
       return NextResponse.json(
-        { message: 'User already exists' },
+        { message: 'Name must be at least 2 characters' },
         { status: 400 }
       );
     }
 
+    // Connect to database
+    let db;
+    try {
+      const connection = await connectToDatabase();
+      db = connection.db;
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      return NextResponse.json(
+        { message: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
+
+    // Check if user already exists
+    try {
+      const existingUser = await db.collection('users').findOne({ email: email.toLowerCase() });
+      if (existingUser) {
+        return NextResponse.json(
+          { message: 'User with this email already exists' },
+          { status: 400 }
+        );
+      }
+    } catch (dbError) {
+      console.error('Error checking existing user:', dbError);
+      return NextResponse.json(
+        { message: 'Error checking user existence' },
+        { status: 500 }
+      );
+    }
+
     // Hash password
-    const hashedPassword = await hash(password, 12);
+    let hashedPassword;
+    try {
+      hashedPassword = await hash(password, 12);
+    } catch (hashError) {
+      console.error('Password hashing error:', hashError);
+      return NextResponse.json(
+        { message: 'Error processing password' },
+        { status: 500 }
+      );
+    }
 
     // Create user
     const user = {
-      name,
-      email,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const result = await db.collection('users').insertOne(user);
+    let result;
+    try {
+      result = await db.collection('users').insertOne(user);
+    } catch (insertError) {
+      console.error('Error inserting user:', insertError);
+      return NextResponse.json(
+        { message: 'Error creating user account' },
+        { status: 500 }
+      );
+    }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: result.insertedId },
-      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
-      { expiresIn: '7d' }
-    );
+    let token;
+    try {
+      token = jwt.sign(
+        { userId: result.insertedId },
+        process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+        { expiresIn: '7d' }
+      );
+    } catch (jwtError) {
+      console.error('JWT generation error:', jwtError);
+      return NextResponse.json(
+        { message: 'Error generating authentication token' },
+        { status: 500 }
+      );
+    }
 
     // Create response with token
     const response = NextResponse.json(
-      { message: 'User created successfully' },
+      {
+        message: 'User created successfully',
+        user: {
+          id: result.insertedId,
+          name: user.name,
+          email: user.email,
+        }
+      },
       { status: 201 }
     );
 

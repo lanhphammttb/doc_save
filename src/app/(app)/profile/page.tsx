@@ -136,6 +136,7 @@ export default function ProfilePage() {
             layout="vertical"
             initialValues={user || {}}
             onFinish={handleUpdateProfile}
+            size="large"
           >
             <Form.Item
               name="name"
@@ -157,7 +158,7 @@ export default function ProfilePage() {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" className="btn-responsive" style={{ width: '100%', maxWidth: '200px' }}>
                 Update Profile
               </Button>
             </Form.Item>
@@ -169,6 +170,7 @@ export default function ProfilePage() {
             form={form}
             layout="vertical"
             onFinish={handleUpdatePassword}
+            size="large"
           >
             <Form.Item
               name="currentPassword"
@@ -208,7 +210,7 @@ export default function ProfilePage() {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" className="btn-responsive" style={{ width: '100%', maxWidth: '200px' }}>
                 Change Password
               </Button>
             </Form.Item>

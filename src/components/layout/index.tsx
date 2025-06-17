@@ -118,6 +118,7 @@ export default function MainLayout({ children }: LayoutProps) {
         bottom: 0,
         background: token.colorBgContainer,
         borderRight: `1px solid ${token.colorBorderSecondary}`,
+        zIndex: 1000,
       }}
       width={256}
     >
@@ -143,8 +144,22 @@ export default function MainLayout({ children }: LayoutProps) {
       open={mobileDrawerVisible}
       width={256}
       bodyStyle={{ padding: 0 }}
+      maskClosable={true}
+      closable={true}
     >
-      {renderSider()}
+      <div style={{ padding: '16px', textAlign: 'center', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+        <Title level={4} style={{ margin: 0, color: token.colorPrimary }}>
+          DocSave
+        </Title>
+      </div>
+      <Menu
+        theme="light"
+        mode="inline"
+        selectedKeys={[pathname]}
+        items={menuItems}
+        onClick={({ key }) => handleMenuClick(key)}
+        style={{ border: 'none' }}
+      />
     </Drawer>
   );
 
@@ -154,7 +169,7 @@ export default function MainLayout({ children }: LayoutProps) {
       <Layout style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 256) }}>
         <Header
           style={{
-            padding: '0 16px',
+            padding: isMobile ? '0 12px' : '0 16px',
             background: token.colorBgContainer,
             borderBottom: `1px solid ${token.colorBorderSecondary}`,
             display: 'flex',
@@ -162,14 +177,15 @@ export default function MainLayout({ children }: LayoutProps) {
             justifyContent: 'space-between',
             position: 'sticky',
             top: 0,
-            zIndex: 1,
+            zIndex: 999,
+            height: '64px',
           }}
         >
           <Button
             type="text"
             icon={isMobile ? <MenuOutlined /> : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)}
             onClick={() => isMobile ? setMobileDrawerVisible(true) : setCollapsed(!collapsed)}
-            style={{ fontSize: '16px', width: 64, height: 64 }}
+            style={{ fontSize: '16px', width: 48, height: 48 }}
           />
           <Dropdown
             menu={{ items: userMenuItems }}
@@ -178,17 +194,18 @@ export default function MainLayout({ children }: LayoutProps) {
           >
             <Space style={{ cursor: 'pointer' }}>
               <Avatar icon={<UserOutlined />} />
-              <span>{session?.user?.name || session?.user?.email}</span>
+              <span className="hidden sm:inline">{session?.user?.name || session?.user?.email}</span>
             </Space>
           </Dropdown>
         </Header>
         <Content
           style={{
-            margin: '24px 16px',
-            padding: 24,
+            margin: isMobile ? '12px 8px' : '24px 16px',
+            padding: isMobile ? 16 : 24,
             background: token.colorBgContainer,
             borderRadius: token.borderRadius,
             minHeight: 280,
+            overflow: 'auto',
           }}
         >
           {children}

@@ -40,8 +40,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card style={{ width: 400 }}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
+      <Card style={{ width: '100%', maxWidth: 400 }}>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <div className="text-center">
             <Title level={2}>Welcome Back</Title>
@@ -57,6 +57,7 @@ export default function LoginPage() {
               email: '',
               password: '',
             }}
+            size="large"
           >
             <Form.Item
               name="email"

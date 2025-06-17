@@ -126,7 +126,12 @@ export default function LinksPage() {
 
   return (
     <div style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{
+        marginBottom: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
         <div>
           <Title level={2} style={{ margin: 0 }}>Links</Title>
           <Text type="secondary">Manage your saved links</Text>
@@ -136,23 +141,25 @@ export default function LinksPage() {
           icon={<PlusOutlined />}
           onClick={() => router.push('/links/new')}
           size="large"
+          className="btn-responsive"
+          style={{ width: '100%', maxWidth: '200px' }}
         >
           New Link
         </Button>
       </div>
 
       <Card style={{ borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <Space style={{ marginBottom: 16 }} wrap>
+        <Space direction="vertical" size="small" style={{ width: '100%', marginBottom: 16 }}>
           <Input
             placeholder="Search links"
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+            style={{ width: '100%' }}
             allowClear
           />
           <Select
-            style={{ width: 200 }}
+            style={{ width: '100%' }}
             value={categoryFilter}
             onChange={setCategoryFilter}
             placeholder="Filter by category"

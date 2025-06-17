@@ -131,16 +131,23 @@ export default function DashboardPage() {
 
   return (
     <div style={{ padding: '24px', background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{
+        marginBottom: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
         <div>
-          <Title level={2} style={{ margin: 0 }}>Welcome back, {session?.user?.name || 'User'}!</Title>
+          <Title level={2} style={{ margin: 0, fontSize: '24px' }}>Welcome back, {session?.user?.name || 'User'}!</Title>
         </div>
-        <Space>
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => router.push('/documents/new')}
             size="large"
+            className="btn-responsive"
+            style={{ width: '100%', maxWidth: '200px' }}
           >
             New Document
           </Button>
@@ -148,28 +155,53 @@ export default function DashboardPage() {
             icon={<PlusOutlined />}
             onClick={() => router.push('/links/new')}
             size="large"
+            className="btn-responsive"
+            style={{ width: '100%', maxWidth: '200px' }}
           >
             New Link
           </Button>
         </Space>
       </div>
 
-      <Row gutter={[24, 24]}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8}>
           <Card
             hoverable
             bordered={false}
-            style={{ borderRadius: '12px', boxShadow: '0 12px 36px rgba(0,0,0,0.15)', padding: '20px', background: 'linear-gradient(135deg, #e6f7ff, #bae7ff)' }}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.15)',
+              padding: '16px',
+              background: 'linear-gradient(135deg, #e6f7ff, #bae7ff)'
+            }}
+            bodyStyle={{ padding: '16px' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ background: 'rgba(255,255,255,0.8)', borderRadius: '50%', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-                {getTypeIcon('text', '48px')}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.8)',
+                borderRadius: '50%',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                {getTypeIcon('text', '36px')}
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <Text type="secondary" style={{ fontSize: '18px', display: 'block' }}>Documents</Text>
+              <div style={{ textAlign: 'center' }}>
+                <Text type="secondary" style={{ fontSize: '16px', display: 'block' }}>Documents</Text>
                 <Statistic
                   value={stats?.totalDocuments || 0}
-                  valueStyle={{ color: '#1890ff', fontSize: '72px', fontWeight: 'bold' }}
+                  valueStyle={{
+                    color: '#1890ff',
+                    fontSize: '48px',
+                    fontWeight: 'bold'
+                  }}
                 />
               </div>
             </div>
@@ -179,17 +211,40 @@ export default function DashboardPage() {
           <Card
             hoverable
             bordered={false}
-            style={{ borderRadius: '12px', boxShadow: '0 12px 36px rgba(0,0,0,0.15)', padding: '20px', background: 'linear-gradient(135deg, #f9f0ff, #d3adf7)' }}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.15)',
+              padding: '16px',
+              background: 'linear-gradient(135deg, #f9f0ff, #d3adf7)'
+            }}
+            bodyStyle={{ padding: '16px' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ background: 'rgba(255,255,255,0.8)', borderRadius: '50%', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-                {getTypeIcon('link', '48px')}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.8)',
+                borderRadius: '50%',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                {getTypeIcon('link', '36px')}
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <Text type="secondary" style={{ fontSize: '18px', display: 'block' }}>Links</Text>
+              <div style={{ textAlign: 'center' }}>
+                <Text type="secondary" style={{ fontSize: '16px', display: 'block' }}>Links</Text>
                 <Statistic
                   value={stats?.totalLinks || 0}
-                  valueStyle={{ color: '#722ed1', fontSize: '72px', fontWeight: 'bold' }}
+                  valueStyle={{
+                    color: '#722ed1',
+                    fontSize: '48px',
+                    fontWeight: 'bold'
+                  }}
                 />
               </div>
             </div>
@@ -199,29 +254,43 @@ export default function DashboardPage() {
           <Card
             hoverable
             bordered={false}
-            style={{ borderRadius: '12px', boxShadow: '0 12px 36px rgba(0,0,0,0.15)', height: '100%' }}
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.15)',
+              padding: '16px',
+              background: 'linear-gradient(135deg, #f6ffed, #b7eb8f)'
+            }}
+            bodyStyle={{ padding: '16px' }}
           >
-            <Title level={4} style={{ marginBottom: 24 }}>Distribution</Title>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.8)',
+                borderRadius: '50%',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+              }}>
+                {getTypeIcon('file', '36px')}
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Text type="secondary" style={{ fontSize: '16px', display: 'block' }}>Files</Text>
+                <Statistic
+                  value={(stats?.totalDocuments || 0) + (stats?.totalLinks || 0)}
+                  valueStyle={{
+                    color: '#52c41a',
+                    fontSize: '48px',
+                    fontWeight: 'bold'
+                  }}
+                />
+              </div>
+            </div>
           </Card>
         </Col>
       </Row>

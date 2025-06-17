@@ -188,71 +188,85 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ padding: '24px', background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
+      <div style={{
+        marginBottom: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
         <Title level={2}>Documents</Title>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => router.push('/documents/new')}
+          className="btn-responsive"
+          style={{ width: '100%', maxWidth: '200px' }}
         >
           New Document
         </Button>
       </div>
 
       <Card>
-        <Space style={{ marginBottom: 16 }} wrap>
+        <Space direction="vertical" size="small" style={{ width: '100%', marginBottom: 16 }}>
           <Input
             placeholder="Search documents"
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 200 }}
+            style={{ width: '100%' }}
           />
-          <Select
-            value={typeFilter}
-            onChange={setTypeFilter}
-            style={{ width: 120 }}
-          >
-            <Option value="all">All Types</Option>
-            <Option value="text">Text</Option>
-            <Option value="file">File</Option>
-            <Option value="link">Link</Option>
-          </Select>
-          <Select
-            value={topicFilter}
-            onChange={setTopicFilter}
-            style={{ width: 120 }}
-          >
-            <Option value="all">All Topics</Option>
-            {topics.map((topic) => (
-              <Option key={topic} value={topic}>
-                {topic}
-              </Option>
-            ))}
-          </Select>
-          <Select
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            style={{ width: 120 }}
-          >
-            <Option value="all">All Categories</Option>
-            {categories.map((category) => (
-              <Option key={category} value={category}>
-                {category}
-              </Option>
-            ))}
-          </Select>
+          <Space wrap style={{ width: '100%' }}>
+            <Select
+              value={typeFilter}
+              onChange={setTypeFilter}
+              style={{ width: '100%', minWidth: '120px' }}
+              placeholder="Type"
+            >
+              <Option value="all">All Types</Option>
+              <Option value="text">Text</Option>
+              <Option value="file">File</Option>
+              <Option value="link">Link</Option>
+            </Select>
+            <Select
+              value={topicFilter}
+              onChange={setTopicFilter}
+              style={{ width: '100%', minWidth: '120px' }}
+              placeholder="Topic"
+            >
+              <Option value="all">All Topics</Option>
+              {topics.map((topic) => (
+                <Option key={topic} value={topic}>
+                  {topic}
+                </Option>
+              ))}
+            </Select>
+            <Select
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              style={{ width: '100%', minWidth: '120px' }}
+              placeholder="Category"
+            >
+              <Option value="all">All Categories</Option>
+              {categories.map((category) => (
+                <Option key={category} value={category}>
+                  {category}
+                </Option>
+              ))}
+            </Select>
+          </Space>
         </Space>
 
         <Table
           columns={columns}
           dataSource={filteredDocuments}
           rowKey="_id"
+          scroll={{ x: true }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} items`,
+            responsive: true,
           }}
         />
       </Card>
